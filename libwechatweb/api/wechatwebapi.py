@@ -126,7 +126,8 @@ class WeChatAPI(object):
         return self.__redirect_uri
     
     def resetdeviceid(self):
-        self.__base_request["DeviceID"]='e%s'%repr(random.random())[2:17]
+        #self.__base_request["DeviceID"]='e%s'%repr(random.random())[2:17]
+        pass
         
     def get_uuid(self):
         url = "https://login.wx.qq.com/jslogin";
@@ -433,12 +434,12 @@ class WeChatAPI(object):
 
     def update_sync_key(self,resp):
         self.__sync_key_dic = resp['SyncKey']
-
+        '''
         def foo(x):
             return str(x['Key']) + '_' + str(x['Val'])
-
-        self.__sync_key = '|'.join(
-            [foo(keyVal) for keyVal in self.__sync_key_dic['List']])
+        self.__sync_key = '|'.join([foo(keyVal) for keyVal in self.__sync_key_dic['List']])
+        '''
+        self.__sync_key = '|'.join(["%s_%s"%(k,v) for k,v in self.__sync_key_dic['List']])
         
     def webwx_sync(self):
         '''
@@ -476,7 +477,7 @@ class WeChatAPI(object):
               '?fun=sys&pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        local_id = client_msg_id = self.get_client_msg_id()
+        local_id = client_msg_id = self.__get_client_msg_id()
         
         self.resetdeviceid()
         params = {
@@ -504,7 +505,7 @@ class WeChatAPI(object):
               '?f=json&fun=async&pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        local_id = client_msg_id = self.get_client_msg_id()
+        local_id = client_msg_id = self.__get_client_msg_id()
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
@@ -536,7 +537,7 @@ class WeChatAPI(object):
               '?f=json&fun=async&pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        local_id = client_msg_id = self.get_client_msg_id()
+        local_id = client_msg_id = self.__get_client_msg_id()
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
@@ -567,7 +568,7 @@ class WeChatAPI(object):
               '?f=json&fun=async&pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        local_id = client_msg_id = self.get_client_msg_id()
+        local_id = client_msg_id = self.__get_client_msg_id()
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
@@ -594,7 +595,7 @@ class WeChatAPI(object):
         response = self.__post_json(url,params,headers=headers)
         return response
     
-    def get_client_msg_id(self):
+    def __get_client_msg_id(self):
         client_msg_id = "%d%s"%(int(time.time() * 1000) ,str(random.random())[:5].replace('.', ''))
         return client_msg_id
     
@@ -603,7 +604,7 @@ class WeChatAPI(object):
               '?pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        local_id = client_msg_id = self.get_client_msg_id()
+        local_id = client_msg_id = self.__get_client_msg_id()
 
         self.resetdeviceid()
         params = {

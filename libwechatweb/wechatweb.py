@@ -6,10 +6,6 @@ Created on 2018年3月25日
 @author: zhaohongxing
 '''
 
-import random
-import time
-import requests
-import xml.dom.minidom
 import re
 import os
 import logging
@@ -242,10 +238,6 @@ class WeChatWeb(object):
     def webwx_send_app_msg(self,message):
         return self.webchatwebapi.webwx_send_app_msg(self.__user,message)
     
-    def get_client_msg_id(self):
-        client_msg_id = "%d%s"%(int(time.time() * 1000) ,str(random.random())[:5].replace('.', ''))
-        return client_msg_id
-    
     def webwx_revoke_msg(self,message):
         return self.webchatwebapi.webwx_revoke_msg(self.__user,message)
     
@@ -272,7 +264,7 @@ class WeChatWeb(object):
     def getChats(self):
         return self.__chat_list
     
-    def setChat(self,i,chat):
+    def addChat(self,i,chat):
         self.__chat_list[i] = chat
     
     def appendChat(self,chat):
