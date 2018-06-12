@@ -11,16 +11,6 @@ import os
 import logging
 from api.wechatwebapi import WeChatAPI
 
-'''
-1.ContactFlag:
-    1是好友，值为3是公众号
-2."UserName" 用户名称:
-    一个"@"为好友，两个"@"为群组
-3."Sex": 
-    性别，0-未设置（公众号、保密），1-男，2-女
-4."StarFriend": 是否为星标朋友  0-否  1-是
-'''
-
 class WeChatWeb(object):
     def __init__(self):
         self.hosts = {

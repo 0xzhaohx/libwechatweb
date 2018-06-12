@@ -286,7 +286,7 @@ class WeChatAPI(object):
 
         response = self.__post(url=url, data=json.dumps(params, ensure_ascii=False).encode('utf8'), headers=headers)
         chats_dict = json.loads(response, object_hook=_decode_data)
-        self.update_sync_key(chats_dict)
+        self.__update_sync_key(chats_dict)
         return chats_dict
 
     def webwxstatusnotify(self,user):
@@ -432,7 +432,7 @@ class WeChatAPI(object):
         else:
             return (-1,-1)
 
-    def update_sync_key(self,resp):
+    def __update_sync_key(self,resp):
         self.__sync_key_dic = resp['SyncKey']
         '''
         def foo(x):
@@ -469,7 +469,7 @@ class WeChatAPI(object):
         response = self.__post_json(url, params)
         dictt = json.loads(response, object_hook=_decode_data)
         if dictt['BaseResponse']['Ret'] == 0:
-            self.update_sync_key(dictt)
+            self.__update_sync_key(dictt)
         return response
     
     def webwx_send_emoticon(self,msg):
