@@ -6,7 +6,6 @@ Created on 2018年3月25日
 @author: zhaohongxing
 '''
 
-import re
 import os
 import logging
 from api.wechatwebapi import WeChatAPI
@@ -64,15 +63,6 @@ class WeChatWeb(object):
         
     def get_uuid(self):
         return self.webchatwebapi.get_uuid()
-
-    def set_uuid(self,regx,data):
-        pm = re.search(regx, data)
-        if pm:
-            code = pm.group(1)
-            self.uuid = pm.group(2)
-            return True
-        else:
-            return False
 
     def generate_qrcode(self):
         return self.webchatwebapi.generate_qrcode()
@@ -182,8 +172,8 @@ class WeChatWeb(object):
                    
         return dictt
 
-    def update_chat(self,i,chat):
-        self.__chat_list[i] = chat
+    def update_chat_contact(self,i,contact):
+        self.__chat_list[i] = contact
         
         
     def sync_check(self,host=None):
@@ -251,14 +241,14 @@ class WeChatWeb(object):
     def getUser(self):
         return self.__user
     
-    def getChats(self):
+    def getChatContacts(self):
         return self.__chat_list
     
-    def addChat(self,i,chat):
-        self.__chat_list[i] = chat
+    def addChatContact(self,i,contact):
+        self.__chat_list[i] = contact
     
-    def appendChat(self,chat):
-        self.__chat_list.append(chat)
+    def appendChatContact(self,contact):
+        self.__chat_list.append(contact)
         
     def getFriends(self):
         return self.__friend_list
