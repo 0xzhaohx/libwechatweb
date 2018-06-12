@@ -116,9 +116,13 @@ class WeChatAPI(object):
         self.__lang = 'zh_TW'
         self.timeout = 30
         self.__session = requests.session()
-        self.__user_agent = (
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'
-        )
+        self.__user_agents = [ 
+            'Mozilla/5.0 (X11; Linux x86_64)', 
+            'AppleWebKit/537.36 (KHTML, like Gecko)',
+            'Chrome/65.0.3325.181',
+            'Safari/537.36'
+        ]
+        self.__user_agent = self.__user_agents[random.randint(0,len(self.__user_agents)-1)]
         self.version='0.1'
         self.wxversion = 'v2'
         
@@ -141,11 +145,11 @@ class WeChatAPI(object):
         url = url + "?" + urllib.urlencode(params)
         response = self.__get(url)
         regx = r'wechat.QRLogin.code = (\d+); wechat.QRLogin.uuid = "(\S+?)"'
-        if self.set_uuid(regx,response):
+        if self.__set_uuid(regx,response):
             pass
         else:
             regx = r'window.QRLogin.code = (\d+); window.QRLogin.uuid = "(\S+?)"'
-            if self.set_uuid(regx, response):
+            if self.__set_uuid(regx, response):
                 pass
         '''
         pm = re.search(regx, data)
@@ -158,7 +162,7 @@ class WeChatAPI(object):
         return response
 
 
-    def set_uuid(self,regx,data):
+    def __set_uuid(self,regx,data):
         pm = re.search(regx, data)
         if pm:
             code = pm.group(1)
@@ -228,19 +232,19 @@ class WeChatAPI(object):
         print("over------------------")
         return False
 
-    '''
-    return:
-        <error>
-            <ret>0</ret>
-            <message>OK</message>
-            <skey>xxx</skey>
-            <wxsid>xxx</wxsid>
-            <wxuin>xxx</wxuin>
-            <pass_ticket>xxx</pass_ticket>
-            <isgrayscale>1</isgrayscale>
-        </error>
-    '''
     def login(self):
+        '''
+        return:
+            <error>
+                <ret>0</ret>
+                <message>OK</message>
+                <skey>xxx</skey>
+                <wxsid>xxx</wxsid>
+                <wxuin>xxx</wxuin>
+                <pass_ticket>xxx</pass_ticket>
+                <isgrayscale>1</isgrayscale>
+            </error>
+        '''
         response = self.__get(self.__redirect_uri)
         doc = xml.dom.minidom.parseString(response)
         root = doc.documentElement
@@ -396,22 +400,22 @@ class WeChatAPI(object):
                    
         return dictt
 
-    '''
-        return wechat.synccheck={retcode:"xxx",selector:"xxx"}
-        retcode:
-            0:success
-            1100:你在手机上登出了微信
-            1101:你在其他地方登录了 WEB 版微信
-            1102:你在手机上主动退出了
-        selector:
-            0:nothing
-            2:new message?发送消息返回结果
-            4:朋友圈有动态
-            6:有消息返回结果
-            7:webwxsync? or 进入/离开聊天界面?
-            
-    '''
     def sync_check(self,host=None):
+        '''
+            response body:wechat.synccheck={retcode:"xxx",selector:"xxx"}
+            retcode:
+                0:success
+                1100:你在手机上登出了微信
+                1101:你在其他地方登录了 WEB 版微信
+                1102:你在手机上主动退出了
+            selector:
+                0:nothing
+                2:new message?发送消息返回结果
+                4:朋友圈有动态
+                6:有消息返回结果
+                7:webwxsync? or 进入/离开聊天界面?
+                
+        '''
         if not host:
             host = "https://webpush.wx.qq.com/cgi-bin/mmwebwx-bin/synccheck"
         params = {
@@ -426,11 +430,7 @@ class WeChatAPI(object):
 
         url = host + '?' + urllib.urlencode(params)
         response = self.__get(url)
-        pm = re.search(r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', response)
-        if pm:
-            return (pm.group(1), pm.group(2))
-        else:
-            return (-1,-1)
+        return response
 
     def __update_sync_key(self,resp):
         self.__sync_key_dic = resp['SyncKey']

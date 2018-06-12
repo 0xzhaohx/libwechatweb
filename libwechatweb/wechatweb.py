@@ -6,6 +6,7 @@ Created on 2018年3月25日
 @author: zhaohongxing
 '''
 
+import re
 import os
 import logging
 from api.wechatwebapi import WeChatAPI
@@ -178,7 +179,7 @@ class WeChatWeb(object):
         
     def sync_check(self,host=None):
         '''
-            return wechat.synccheck={retcode:"xxx",selector:"xxx"}
+            response body: wechat.synccheck={retcode:"xxx",selector:"xxx"}
             retcode:
                 0:success
                 1100:你在手机上登出了微信
@@ -192,8 +193,13 @@ class WeChatWeb(object):
                 7:webwxsync? or 进入/离开聊天界面?
                 
         '''
+        response = self.webchatwebapi.sync_check(host)
         
-        return self.webchatwebapi.sync_check(host)
+        pm = re.search(r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', response)
+        if pm:
+            return (pm.group(1), pm.group(2))
+        else:
+            return (-1,-1)
 
     def webwx_sync(self):
         '''
