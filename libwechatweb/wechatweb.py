@@ -62,9 +62,6 @@ class WeChatWeb(object):
         self.version='0.1'
         self.wxversion = 'v2'
         
-    def get_uuid(self):
-        return self.webchatwebapi.get_uuid()
-
     def generate_qrcode(self):
         return self.webchatwebapi.generate_qrcode()
 
@@ -130,11 +127,9 @@ class WeChatWeb(object):
             if not user_name or not head_img_url:
                 continue
             if user_name.startswith('@'):
-                pass
-                #self.webwx_get_icon(user_name, head_img_url)
+                self.webwx_get_icon(user_name, head_img_url)
             elif user_name.startswith('@@'):
-                pass
-                #self.webwx_get_head_img(user_name, head_img_url)
+                self.webwx_get_head_img(user_name, head_img_url)
             else:
                 pass
     '''
@@ -265,7 +260,7 @@ class WeChatWeb(object):
     
 if __name__ =="__main__":
     api = WeChatAPI()
-    uuid = api.get_uuid()
+    uuid = api.__get_uuid()
     print("__get uuid success")
     api.generate_qrcode()
     print("enerate_qrcode success")

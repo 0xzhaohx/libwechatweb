@@ -54,45 +54,46 @@ def _decode_data(data):
 
 
 class WeChatAPI(object):
-    def __init__(self):
-        self.hosts = {
-            "weixin.qq.com":{
-                'login':'login.weixin.qq.com',
-                'file':'file.wx.qq.com',
-                'push':'webpush.weixin.qq.com'
-            },
-            "wx2.qq.com":{
-                'login':'login.wx2.qq.com',
-                'file':'file.wx2.qq.com',
-                'push':'webpush.wx2.qq.com'
-            },
-            "wx8.qq.com":{
-                'login':'login.wx8.qq.com',
-                'file':'file.wx8.qq.com',
-                'push':'webpush.wx8.qq.com'
-            },
-            "qq.com":{
-                'login':'login.wx.qq.com',
-                'file':'file.wx.qq.com',
-                'push':'webpush.wx.qq.com'
-            },
-            "wechat.com":{
-                'login':'login.web.wechat.com',
-                'file':'file.web.wechat.com',
-                'push':'webpush.web.wechat.com'
-            },
-            "web2.wechat.com":{
-                'login':'login.web2.wechat.com',
-                'file':'file.web2.wechat.com',
-                'push':'webpush.web2.wechat.com'
-            }
+    __HOSTS = {
+        "weixin.qq.com":{
+            'login':'login.weixin.qq.com',
+            'file':'file.wx.qq.com',
+            'push':'webpush.weixin.qq.com'
+        },
+        "wx2.qq.com":{
+            'login':'login.wx2.qq.com',
+            'file':'file.wx2.qq.com',
+            'push':'webpush.wx2.qq.com'
+        },
+        "wx8.qq.com":{
+            'login':'login.wx8.qq.com',
+            'file':'file.wx8.qq.com',
+            'push':'webpush.wx8.qq.com'
+        },
+        "qq.com":{
+            'login':'login.wx.qq.com',
+            'file':'file.wx.qq.com',
+            'push':'webpush.wx.qq.com'
+        },
+        "wechat.com":{
+            'login':'login.web.wechat.com',
+            'file':'file.web.wechat.com',
+            'push':'webpush.web.wechat.com'
+        },
+        "web2.wechat.com":{
+            'login':'login.web2.wechat.com',
+            'file':'file.web2.wechat.com',
+            'push':'webpush.web2.wechat.com'
         }
-        logging.basicConfig(filename='./wechat.log',level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+    }
+    
+    def __init__(self):
+        self.hosts = self.__HOSTS["weixin.qq.com"]
+        logging.basicConfig(filename='./wechatwebapi.log',level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.user_home = os.path.expanduser('~')
         self.app_home = self.user_home + '/.wechat/'
         self.cache_home = ("%s/cache/"%(self.app_home))
         self.cache_image_home = "%s/image/"%(self.cache_home)
-        self.file_host = None
         self.__appid = 'wx782c26e4c19acffb'
         self.__uuid = ''
         self.__redirect_uri = None
@@ -133,7 +134,7 @@ class WeChatAPI(object):
         #self.__base_request["DeviceID"]='e%s'%repr(random.random())[2:17]
         pass
         
-    def get_uuid(self):
+    def __get_uuid(self):
         url = "https://login.wx.qq.com/jslogin";
         params = {
             'appid': self.__appid,
@@ -144,6 +145,20 @@ class WeChatAPI(object):
         }
         url = url + "?" + urllib.urlencode(params)
         response = self.__get(url)
+        return response
+
+
+    def __set_uuid(self,regx,data):
+        pm = re.search(regx, data)
+        if pm:
+            #code = pm.group(1)
+            self.__uuid = pm.group(2)
+            return True
+        else:
+            return False
+
+    def generate_qrcode(self):
+        response = self.__get_uuid()
         regx = r'wechat.QRLogin.code = (\d+); wechat.QRLogin.uuid = "(\S+?)"'
         if self.__set_uuid(regx,response):
             pass
@@ -151,27 +166,6 @@ class WeChatAPI(object):
             regx = r'window.QRLogin.code = (\d+); window.QRLogin.uuid = "(\S+?)"'
             if self.__set_uuid(regx, response):
                 pass
-        '''
-        pm = re.search(regx, data)
-        if pm:
-            code = pm.group(1)
-            self.uuid = pm.group(2)
-            print("code:" + code + ",uuid:" + self.uuid)
-        else:
-        '''
-        return response
-
-
-    def __set_uuid(self,regx,data):
-        pm = re.search(regx, data)
-        if pm:
-            code = pm.group(1)
-            self.__uuid = pm.group(2)
-            return True
-        else:
-            return False
-
-    def generate_qrcode(self):
         url = "https://login.weixin.qq.com/qrcode/" + self.__uuid;
         params = {
             't': 'webwx',
@@ -186,7 +180,7 @@ class WeChatAPI(object):
 
     def webwx_stat_report(self):
         url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxstatreport?fun=new&lang="+self.__lang;
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Count': 0,
@@ -277,7 +271,7 @@ class WeChatAPI(object):
               '?pass_ticket=%s&r=%s&lang=%s' % (
                   self.__pass_ticket, int(time.time()), self.__lang
               )
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request
         }
@@ -298,7 +292,7 @@ class WeChatAPI(object):
               '?pass_ticket=%s' % (
                   self.__pass_ticket
               )
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Code' : 3,
@@ -341,7 +335,7 @@ class WeChatAPI(object):
               '?pass_ticket=%s&lang=%s' % (
                   self.__pass_ticket, self.__lang
               )
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request
         }
@@ -454,7 +448,7 @@ class WeChatAPI(object):
             '?sid=%s&skey=%s&pass_ticket=%s' % (
                 self.__sid, self.__skey, self.__pass_ticket
             )
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'SyncKey':self.__sync_key_dic,
@@ -479,7 +473,7 @@ class WeChatAPI(object):
               )
         local_id = client_msg_id = self.__get_client_msg_id()
         
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
@@ -509,7 +503,7 @@ class WeChatAPI(object):
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
@@ -541,7 +535,7 @@ class WeChatAPI(object):
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
@@ -572,7 +566,7 @@ class WeChatAPI(object):
         headers = {
             "Content-Type": "application/json; charset=UTF-8"
         }
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
@@ -606,7 +600,7 @@ class WeChatAPI(object):
               )
         local_id = client_msg_id = self.__get_client_msg_id()
 
-        self.resetdeviceid()
+        #self.resetdeviceid()
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
@@ -658,9 +652,9 @@ class WeChatAPI(object):
             md5.update(fe.read())
             file_md5_digest = md5.hexdigest()
             
-        webwx_data_ticket = self.session.cookies['webwx_data_ticket']
+        webwx_data_ticket = self.__session.cookies['webwx_data_ticket']
         client_media_id =int(time.time())
-        self.resetdeviceid()
+        #self.resetdeviceid()
         uploadmediarequest = json.dumps({
             "UploadType":2,
             "BaseRequest": self.__base_request,
@@ -714,7 +708,7 @@ class WeChatAPI(object):
               '?r=%s&lang=%s&pass_ticket=%s' %(
                   int(time.time()),self.__lang,self.__pass_ticket
                )
-        self.resetdeviceid()
+        #self.resetdeviceid()
         data = {
             "BaseRequest": self.__base_request,
             "MemberCount":len(member_list),
@@ -840,7 +834,7 @@ class WeChatAPI(object):
 
 if __name__ =="__main__":
     api = WeChatAPI()
-    uuid = api.get_uuid()
+    uuid = api.__get_uuid()
     print("__get uuid success")
     api.generate_qrcode()
     print("enerate_qrcode success")
