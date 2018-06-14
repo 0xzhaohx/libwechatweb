@@ -239,6 +239,13 @@ class WeChatWeb(object):
         response = self.webchatwebapi.webwx_create_chatroom(member_list)
         return response
     
+    def webwx_update_chatroom(self,params):
+        '''
+        :param params format:{"NewTopic":"xxx","ChatRoomName":"xxx","BaseRequest":"xxxx"}
+        '''
+        response = self.webchatwebapi.webwx_update_chatroom(params)
+        return response
+    
     def getUser(self):
         return self.__user
     

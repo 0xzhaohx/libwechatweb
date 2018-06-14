@@ -86,6 +86,12 @@ class WeChatAPI(object):
             'push':'webpush.web2.wechat.com'
         }
     }
+    __USER_AGENTS = [ 
+        'Mozilla/5.0 (X11; Linux x86_64)', 
+        'AppleWebKit/537.36 (KHTML, like Gecko)',
+        'Chrome/65.0.3325.181',
+        'Safari/537.36'
+    ]
     
     def __init__(self):
         self.hosts = self.__HOSTS["weixin.qq.com"]
@@ -117,13 +123,7 @@ class WeChatAPI(object):
         self.__lang = 'zh_TW'
         self.timeout = 30
         self.__session = requests.session()
-        self.__user_agents = [ 
-            'Mozilla/5.0 (X11; Linux x86_64)', 
-            'AppleWebKit/537.36 (KHTML, like Gecko)',
-            'Chrome/65.0.3325.181',
-            'Safari/537.36'
-        ]
-        self.__user_agent = self.__user_agents[random.randint(0,len(self.__user_agents)-1)]
+        self.__user_agent = self.__USER_AGENTS[random.randint(0,len(self.__USER_AGENTS)-1)]
         self.version='0.1'
         self.wxversion = 'v2'
         
@@ -195,10 +195,10 @@ class WeChatAPI(object):
         '''
         tip = 0 已扫描
         tip = 1 未扫描
-        turn
+        return code
         408 timeout
-        200
-        201
+        200 登陸成功
+        201 己掃描
         '''
         url = "https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login" + "?loginicon="+str(self.__login_icon)+"&tip=" + str(tip) + "&uuid=" + self.__uuid + "&_" + str(int(time.time()))
         response = self.__get(url)
@@ -209,22 +209,20 @@ class WeChatAPI(object):
             pm = re.search(r'window.code=(\d+);', data)
         code = pm.group(1)
         if code == '201':
-            return True
+            pass
         elif code == '200':
             pm = re.search(r'wechat.redirect_uri="(\S+?)";', data)
             if not pm:
                 pm = re.search(r'window.redirect_uri="(\S+?)";', data)
             if not pm:
-                return False
-            #self.__redirect_uri = "%s%s%s"%(pm.group(1) + '&fun='+self.__fun + '&version=v2')
+                code = -1
             self.__redirect_uri = "%s&fun=%s&version=v2"%(pm.group(1),self.__fun)
-            return True
         elif code == '408':
             print("error 408")
         else:
+            code = -9999
             print("unknow error")
-        print("over------------------")
-        return False
+        return code
 
     def login(self):
         '''
@@ -716,6 +714,22 @@ class WeChatAPI(object):
             "Topic":""
         }
         response = self.__post_json(url=url,data=data)
+        return response
+    
+    def webwx_update_chatroom(self,params):
+        '''
+        url:https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxupdatechatroom?fun=modtopic&lang=zh_TW&pass_ticket=%252FNvW1dfkRrPc2wRfVU049j7VFjA8%252BkjlJjLXv7ulI1U%253D
+        '''
+        '''
+        :param params format:{"NewTopic":"xxx","ChatRoomName":"xxx","BaseRequest":"xxxx"}
+        '''
+        url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxupdatechatroom" + \
+              '?fun=modtopic&lang=%s&pass_ticket=%s' %(
+                  self.__lang,self.__pass_ticket
+               )
+        #self.resetdeviceid()
+        params["BaseRequest"]= self.__base_request
+        response = self.__post_json(url=url,data=params)
         return response
     
     def __get(self, url, data= {},stream=False):
