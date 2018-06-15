@@ -641,7 +641,7 @@ class WeChatAPI(object):
         file_mimetype = mimetypes.guess_type(upload_file)[0]
        
         mediatype = "pic"
-        if not file_mimetype.startswith("image"):
+        if not file_mimetype or not file_mimetype.startswith("image"):
             mediatype = "doc"
             
         files = [('filename',("%s"%(file_name),open(upload_file,'rb'),file_mimetype))]
