@@ -45,11 +45,11 @@ class WeChatWeb(object):
                 'push':'webpush.web2.wechat.com'
             }
         }
-        logging.basicConfig(filename='./wechat.log',level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.user_home = os.path.expanduser('~')
         self.app_home = self.user_home + '/.wechat/'
         self.cache_home = ("%s/cache/"%(self.app_home))
         self.cache_image_home = "%s/image/"%(self.cache_home)
+        logging.basicConfig(filename='%s/wechat.log'%self.app_home,level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.status = -1#登陸與否
         self.webchatwebapi = WeChatAPI()
         #the user had login
@@ -167,10 +167,6 @@ class WeChatWeb(object):
         dictt = self.webchatwebapi.webwx_batch_get_contact(params)
                    
         return dictt
-
-    def update_chat_contact(self,i,contact):
-        self.__chat_list[i] = contact
-        
         
     def sync_check(self,host=None):
         '''
@@ -225,10 +221,10 @@ class WeChatWeb(object):
     def webwx_upload_media(self,dest_user,upload_file):
         return self.webchatwebapi.webwx_upload_media(self.__user,dest_user, upload_file)
     
-    '''
-            根据MSG_ID下載圖片
-    '''
     def webwx_get_msg_img(self,message_id,media_type="jpg"):
+        '''
+        :desc 根据MSG_ID下載圖片
+        '''
         data = self.webchatwebapi.webwx_get_msg_img(message_id, media_type)
         return data
     
@@ -263,6 +259,13 @@ class WeChatWeb(object):
     
     def appendFriend(self,friend):
         self.__friend_list.append(friend)
+
+    def update_chat_contact(self,i,contact):
+        self.__chat_list[i] = contact
+        
+    @DeprecationWarning
+    def update_friend(self,i,contact):
+        self.__friend_list[i] = contact
     
     
 if __name__ =="__main__":

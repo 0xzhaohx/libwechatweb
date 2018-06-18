@@ -811,8 +811,8 @@ class WeChatAPI(object):
                 response = self.__session.post(url=url, data=json.dumps(data, ensure_ascii=False).encode('utf8'), headers=_headers)
                 response.encoding='utf-8'
                 response_text = response.text
-                logging.debug(url)
-                logging.debug(response_text)
+                logging.info(url)
+                logging.info(response_text)
                 response.close()
                 return response_text
             except (KeyboardInterrupt, SystemExit) ,e:
