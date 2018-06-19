@@ -51,7 +51,7 @@ class WeChatWeb(object):
         self.cache_image_home = "%s/image/"%(self.cache_home)
         logging.basicConfig(filename='%s/wechat.log'%self.app_home,level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.status = -1#登陸與否
-        self.webchatwebapi = WeChatAPI()
+        self.__webchatwebapi = WeChatAPI()
         #the user had login
         self.__user = []
         #會話列表
@@ -63,17 +63,20 @@ class WeChatWeb(object):
         self.wxversion = 'v2'
         
     def generate_qrcode(self):
-        return self.webchatwebapi.generate_qrcode()
+        '''
+        
+        '''
+        return self.__webchatwebapi.generate_qrcode()
 
     def webwx_stat_report(self):
-        self.webchatwebapi.webwx_stat_report()
+        self.__webchatwebapi.webwx_stat_report()
     
     def wait4login(self,tip=1):
-        return self.webchatwebapi.wait4login(tip)
-    
+        return self.__webchatwebapi.wait4login(tip)
+    '''
     def get_redirect_url(self):
-        return self.webchatwebapi.get_redirect_url()
-
+        return self.__webchatwebapi.get_redirect_url()
+    '''
     def login(self):
         '''
         return:
@@ -87,27 +90,28 @@ class WeChatWeb(object):
                 <isgrayscale>1</isgrayscale>
             </error>
         '''
-        return self.webchatwebapi.login()
+        return self.__webchatwebapi.login()
 
     def webwx_init(self):
-        data = self.webchatwebapi.webwx_init()
+        data = self.__webchatwebapi.webwx_init()
         self.__user = data['User']
         self.__chat_list = data['ContactList']
         #download and setup logined user head img
         self.webwx_get_icon(self.__user['UserName'], self.__user['HeadImgUrl'])
+        self.__webwxstatusnotify()
         return data
 
-    def webwxstatusnotify(self):
-        return self.webchatwebapi.webwxstatusnotify(self.__user)
+    def __webwxstatusnotify(self):
+        return self.__webchatwebapi.webwxstatusnotify(self.__user)
 
     def webwx_get_icon(self, user_name, img_url):
-        self.webchatwebapi.webwx_get_icon(user_name, img_url)
+        self.__webchatwebapi.webwx_get_icon(user_name, img_url)
             
     def webwx_get_head_img(self,user_name,head_img_url):
         '''
         #用於取群圖標
         '''
-        self.webchatwebapi.webwx_get_head_img(user_name, head_img_url)
+        self.__webchatwebapi.webwx_get_head_img(user_name, head_img_url)
 
     def webwx_get_contact(self):
         '''
@@ -116,7 +120,7 @@ class WeChatWeb(object):
         #VerifyFlag
         #
         '''
-        contacts_dict = self.webchatwebapi.webwx_get_contact()
+        contacts_dict = self.__webchatwebapi.webwx_get_contact()
         #see #webwx_batch_get_contact()
         self.__friend_list.extend(contacts_dict['MemberList'])
         #self.__friend_count += int(contacts_dict['MemberCount'])
@@ -164,7 +168,7 @@ class WeChatWeb(object):
         }
     '''
     def webwx_batch_get_contact(self, params):
-        dictt = self.webchatwebapi.webwx_batch_get_contact(params)
+        dictt = self.__webchatwebapi.webwx_batch_get_contact(params)
                    
         return dictt
         
@@ -184,7 +188,7 @@ class WeChatWeb(object):
                 7:webwxsync? or 进入/离开聊天界面?
                 
         '''
-        response = self.webchatwebapi.sync_check(host)
+        response = self.__webchatwebapi.sync_check(host)
         
         pm = re.search(r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', response)
         if pm:
@@ -201,46 +205,53 @@ class WeChatWeb(object):
         ModContactList: 变更联系人列表
         SyncKey:新的synckey列表
         '''
-        return self.webchatwebapi.webwx_sync()
+        return self.__webchatwebapi.webwx_sync()
     
     def webwx_send_emoticon(self,message):
-        return self.webchatwebapi.webwx_send_emoticon(message)
+        return self.__webchatwebapi.webwx_send_emoticon(message)
     
     def webwx_send_msg(self,message):
-        return self.webchatwebapi.webwx_send_msg(self.__user,message)
+        return self.__webchatwebapi.webwx_send_msg(self.__user,message)
     
     def webwx_send_msg_img(self,message):
-        return self.webchatwebapi.webwx_send_msg_img(self.__user,message)
+        return self.__webchatwebapi.webwx_send_msg_img(self.__user,message)
     
     def webwx_send_app_msg(self,message):
-        return self.webchatwebapi.webwx_send_app_msg(self.__user,message)
+        return self.__webchatwebapi.webwx_send_app_msg(self.__user,message)
     
     def webwx_revoke_msg(self,message):
-        return self.webchatwebapi.webwx_revoke_msg(self.__user,message)
+        return self.__webchatwebapi.webwx_revoke_msg(self.__user,message)
     
     def webwx_upload_media(self,dest_user,upload_file):
-        return self.webchatwebapi.webwx_upload_media(self.__user,dest_user, upload_file)
+        return self.__webchatwebapi.webwx_upload_media(self.__user,dest_user, upload_file)
     
     def webwx_get_msg_img(self,message_id,media_type="jpg"):
+<<<<<<< Upstream, based on branch 'develop' of https://github.com/0xzhaohx/libwechatweb.git
         '''
         :desc 根据MSG_ID下載圖片
         '''
         data = self.webchatwebapi.webwx_get_msg_img(message_id, media_type)
+=======
+        data = self.__webchatwebapi.webwx_get_msg_img(message_id, media_type)
+>>>>>>> c0e6a93 rename webchatwebapi to __webchatwebapi
         return data
     
     def webwx_create_chatroom(self,member_list):
         '''
         :param member_list[{UserName:"@xxxxxxxx"}]
         '''
-        response = self.webchatwebapi.webwx_create_chatroom(member_list)
+        response = self.__webchatwebapi.webwx_create_chatroom(member_list)
         return response
     
     def webwx_update_chatroom(self,params):
         '''
         :param params format:{"NewTopic":"xxx","ChatRoomName":"xxx","BaseRequest":"xxxx"}
         '''
-        response = self.webchatwebapi.webwx_update_chatroom(params)
+        response = self.__webchatwebapi.webwx_update_chatroom(params)
         return response
+    
+    def getWebchatWebAPI(self):
+        return self.__webchatwebapi
     
     def getUser(self):
         return self.__user
