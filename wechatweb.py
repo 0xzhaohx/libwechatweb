@@ -226,14 +226,10 @@ class WeChatWeb(object):
         return self.__webchatwebapi.webwx_upload_media(self.__user,dest_user, upload_file)
     
     def webwx_get_msg_img(self,message_id,media_type="jpg"):
-<<<<<<< Upstream, based on branch 'develop' of https://github.com/0xzhaohx/libwechatweb.git
         '''
         :desc 根据MSG_ID下載圖片
         '''
-        data = self.webchatwebapi.webwx_get_msg_img(message_id, media_type)
-=======
         data = self.__webchatwebapi.webwx_get_msg_img(message_id, media_type)
->>>>>>> c0e6a93 rename webchatwebapi to __webchatwebapi
         return data
     
     def webwx_create_chatroom(self,member_list):
