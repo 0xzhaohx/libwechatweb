@@ -17,41 +17,7 @@ import os
 import hashlib
 import mimetypes
 import logging
-
-'''
-1.ContactFlag:
-    1是好友，值为3是公众号
-2."UserName" 用户名称:
-    一个"@"为好友，两个"@"为群组
-3."Sex": 
-    性别，0-未设置（公众号、保密），1-男，2-女
-4."StarFriend": 是否为星标朋友  0-否  1-是
-'''
-
-def _decode_data(data):
-    """
-    @brief      decode array or dict to utf-8
-    @param      data   array or dict
-    @return     utf-8
-    """
-    if isinstance(data, dict):
-        rv = {}
-        for key, value in data.iteritems():
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
-            rv[key] = _decode_data(value)
-        return rv
-    elif isinstance(data, list):
-        rv = []
-        for item in data:
-            item = _decode_data(item)
-            rv.append(item)
-        return rv
-    elif isinstance(data, unicode):
-        return data.encode('utf-8')
-    else:
-        return data
-
+import wechatutil
 
 class WeChatAPI(object):
     __HOSTS = {
@@ -94,12 +60,12 @@ class WeChatAPI(object):
     ]
     
     def __init__(self):
+        #new
+        self.app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
+        self.customFace = "%s\\customface"%(self.app_home)
+        self.imageRecive = "%s\\imageRec"%(self.app_home)
         self.hosts = self.__HOSTS["weixin.qq.com"]
         logging.basicConfig(filename='./wechatwebapi.log',level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
-        self.user_home = os.path.expanduser('~')
-        self.app_home = self.user_home + '/.wechat/'
-        self.cache_home = ("%s/cache/"%(self.app_home))
-        self.cache_image_home = "%s/image/"%(self.cache_home)
         self.__appid = 'wx782c26e4c19acffb'
         self.__uuid = ''
         self.__redirect_uri = None
@@ -143,7 +109,10 @@ class WeChatAPI(object):
             'lang': self.__lang,
             '_': int(time.time())
         }
+        '''for python2
         url = url + "?" + urllib.urlencode(params)
+        '''
+        url = url + "?" + urllib.parse.urlencode(params)
         response = self.__get(url)
         return response
 
@@ -281,7 +250,7 @@ class WeChatAPI(object):
         }
 
         response = self.__post(url=url, data=json.dumps(params, ensure_ascii=False).encode('utf8'), headers=headers)
-        chats_dict = json.loads(response, object_hook=_decode_data)
+        chats_dict = json.loads(response, object_hook=wechatutil.decode_data)
         self.__update_sync_key(chats_dict)
         return chats_dict
 
@@ -306,7 +275,7 @@ class WeChatAPI(object):
         streamdata = self.__get(url,stream=True)
         if not streamdata:
             pass
-        image = '%s/heads/contact/%s.jpg'%(self.app_home,user_name)
+        image = '%s\\%s.jpg'%(self.customFace,user_name)
         with open(image, 'wb') as image:
             image.write(streamdata)
             
@@ -318,7 +287,9 @@ class WeChatAPI(object):
         streamdata = self.__get(url,stream=True)
         if not streamdata:
             pass
-        image = '%s/heads/contact/%s.jpg'%(self.app_home,user_name)
+        
+        image = '%s\\%s.jpg'%(self.customFace,user_name)
+        #image = '%s/heads/contact/%s.jpg'%(self.app_home,user_name)
         with open(image, 'wb') as image:
             image.write(streamdata)
 
@@ -345,7 +316,7 @@ class WeChatAPI(object):
         }
 
         response = self.__post(url=url, data=json.dumps(params, ensure_ascii=False).encode('utf8'), headers=headers)
-        contacts_dict = json.loads(response, object_hook=_decode_data)
+        contacts_dict = json.loads(response, object_hook=wechatutil.decode_data)
         
         return contacts_dict
     '''
@@ -388,7 +359,7 @@ class WeChatAPI(object):
               )
 
         response = self.__post(url=url, data=json.dumps(params, ensure_ascii=False).encode('utf8'))
-        dictt = json.loads(response, object_hook=_decode_data)
+        dictt = json.loads(response, object_hook=wechatutil.decode_data)
                    
         return dictt
 
@@ -420,7 +391,10 @@ class WeChatAPI(object):
             '_': int(time.time())
         }
 
-        url = host + '?' + urllib.urlencode(params)
+        '''for python2
+        url = host + "?" + urllib.urlencode(params)
+        '''
+        url = host + "?" + urllib.parse.urlencode(params)
         response = self.__get(url)
         return response
 
@@ -459,7 +433,7 @@ class WeChatAPI(object):
         }
 
         response = self.__post_json(url, params)
-        dictt = json.loads(response, object_hook=_decode_data)
+        dictt = json.loads(response, object_hook=wechatutil.decode_data)
         if dictt['BaseResponse']['Ret'] == 0:
             self.__update_sync_key(dictt)
         return response
@@ -782,15 +756,15 @@ class WeChatAPI(object):
                     data = response.text
                 response.close()
                 return data
-            except KeyboardInterrupt,e:
+            except KeyboardInterrupt as e:
                 logging.error(e)
                 raise
                 return False
-            except SystemExit,e:
+            except SystemExit as e:
                 logging.error(e)
                 raise
                 return False
-            except Exception,e:
+            except Exception as e:
                 logging.error(e)
                 return False
 
@@ -815,11 +789,11 @@ class WeChatAPI(object):
                 logging.info(response_text)
                 response.close()
                 return response_text
-            except (KeyboardInterrupt, SystemExit) ,e:
+            except (KeyboardInterrupt, SystemExit) as e:
                 logging.error(e)
                 raise
                 return False
-            except Exception,e:
+            except Exception as e:
                 logging.error(e)
                 return False
     
@@ -837,11 +811,11 @@ class WeChatAPI(object):
             data = response.text
             response.close()
             return data
-        except (KeyboardInterrupt, SystemExit),e:
+        except (KeyboardInterrupt, SystemExit) as e:
             logging.error(e)
             raise
             return None
-        except Exception,e:
+        except Exception as e:
             logging.error(e)
             return None
 

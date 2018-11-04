@@ -45,11 +45,19 @@ class WeChatWeb(object):
                 'push':'webpush.web2.wechat.com'
             }
         }
+        '''
         self.user_home = os.path.expanduser('~')
-        self.app_home = self.user_home + '/.wechat/'
-        self.cache_home = ("%s/cache/"%(self.app_home))
-        self.cache_image_home = "%s/image/"%(self.cache_home)
-        logging.basicConfig(filename='%s/wechat.log'%self.app_home,level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+        self.app_home = self.user_home + '\\.wechat'
+        self.cache_home__ = ("%s\\cache"%(self.app_home))
+        self.cache_image_home__ = "%s\\image"%(self.cache_home)
+        '''
+        #new
+        self.app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
+        self.customFace = "%s\\customface"%(self.app_home)
+        self.imageRecive = "%s\\imageRec"%(self.app_home)
+        self.default_head_icon = './resource/images/default.png'
+        
+        logging.basicConfig(filename='%s\\wechat.log'%self.app_home,level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.status = -1#登陸與否
         self.__webchatwebapi = WeChatAPI()
         #the user had login
@@ -92,12 +100,16 @@ class WeChatWeb(object):
         '''
         return self.__webchatwebapi.login()
 
+    '''
+    return a mini list of chat 
+    '''
     def webwx_init(self):
         data = self.__webchatwebapi.webwx_init()
         self.__user = data['User']
+        #TODO FIX BUG
         self.__chat_list = data['ContactList']
         #download and setup logined user head img
-        self.webwx_get_icon(self.__user['UserName'], self.__user['HeadImgUrl'])
+        ##self.webwx_get_icon(self.__user['UserName'], self.__user['HeadImgUrl'])
         self.__webwxstatusnotify()
         return data
 
@@ -131,13 +143,15 @@ class WeChatWeb(object):
             if not user_name or not head_img_url:
                 continue
             if user_name.startswith('@'):
-                self.webwx_get_icon(user_name, head_img_url)
+                ##self.webwx_get_icon(user_name, head_img_url)
+                pass
             elif user_name.startswith('@@'):
-                self.webwx_get_head_img(user_name, head_img_url)
+                ##self.webwx_get_head_img(user_name, head_img_url)
+                pass
             else:
                 pass
     '''
-    調用完webwx_init得到部分的有過聯天記錄的用户，再調用webwx_batch_get_contact可以護得完整的有過聯天記錄的用户列表
+    #調用完webwx_init得到部分的有過聯天記錄的用户，再調用webwx_batch_get_contact可以護得完整的有過聯天記錄的用户列表
     params:
     1.
         params = {
@@ -289,7 +303,7 @@ if __name__ =="__main__":
     res = api.login()
     init_response = api.webwx_init()
     #print(init_response)
-    api.webwx_status_notify()
+    #api.webwx_status_notify()
     api.webwx_get_contact()
     api.sync_check()
     #da = wechatweb.webwx_sync()
