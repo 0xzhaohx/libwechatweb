@@ -273,11 +273,12 @@ class WeChatAPI(object):
     def webwx_get_icon(self, user_name, head_img_url):
         url = 'https://wx.qq.com%s'%(head_img_url)
         streamdata = self.__get(url,stream=True)
-        if not streamdata:
-            pass
-        image = '%s\\%s.jpg'%(self.customFace,user_name)
-        with open(image, 'wb') as image:
-            image.write(streamdata)
+        if not streamdata and ( len(streamdata) == 0 or b'' == streamdata or '' == streamdata ):
+            logging.warning("stream data of %s is null"%head_img_url)
+        else:
+            image = '%s\\%s.jpg'%(self.customFace,user_name)
+            with open(image, 'wb') as image:
+                image.write(streamdata)
             
     def webwx_get_head_img(self,user_name,head_img_url):
         '''
@@ -319,38 +320,38 @@ class WeChatAPI(object):
         contacts_dict = json.loads(response, object_hook=wechatutil.decode_data)
         
         return contacts_dict
-    '''
-    調用完webwx_init得到部分的有過聯天記錄的用户，再調用webwx_batch_get_contact可以護得完整的有過聯天記錄的用户列表
-    params:
-    1.
-        params = {
-            'BaseRequest': self.base_request,
-            'Count': 1,
-            'List': [
-                {
-
-                    'UserName': '',
-                    'EncryChatRoomId': ''
-                }
-
-            ]
-        }
-    ###################################################
-    2.
-        params = {
-            'BaseRequest': self.base_request,
-            'Count': 1,
-            'List': [
-                {
-
-                    'UserName': '',#群name.如：@@xxxxxx
-                    'ChatRoomId': ''
-                }
-
-            ]
-        }
-    '''
     def webwx_batch_get_contact(self, params):
+        '''
+        調用完webwx_init得到部分近期有過聯天的用户，再調用webwx_batch_get_contact可以護得完整的有過聯天記錄的用户列表
+        params:
+        1.
+            params = {
+                'BaseRequest': self.base_request,
+                'Count': 1,
+                'List': [
+                    {
+    
+                        'UserName': '',
+                        'EncryChatRoomId': ''
+                    }
+    
+                ]
+            }
+        ###################################################
+        2.
+            params = {
+                'BaseRequest': self.base_request,
+                'Count': 1,
+                'List': [
+                    {
+    
+                        'UserName': '',#群name.如：@@xxxxxx
+                        'ChatRoomId': ''
+                    }
+    
+                ]
+            }
+        '''
         
         params['BaseRequest']= self.__base_request
         url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxbatchgetcontact" + \
@@ -438,7 +439,7 @@ class WeChatAPI(object):
             self.__update_sync_key(dictt)
         return response
     
-    def webwx_send_emoticon(self,msg):
+    def webwx_send_emoticon(self,message):
         url = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendemoticon" + \
               '?fun=sys&pass_ticket=%s' % (
                   self.__pass_ticket
@@ -449,10 +450,10 @@ class WeChatAPI(object):
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
-                "Type":msg.type,
-                "Content":msg.content,
+                "Type":message.message_type,
+                "Content":message.content,
                 "FromUserName":self.user['UserName'],
-                "ToUserName":msg.to_user_name,
+                "ToUserName":message.to_user_name,
                 "LocalID":local_id,
                 "ClientMsgId":client_msg_id,
             }
@@ -479,7 +480,7 @@ class WeChatAPI(object):
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
-                "Type":message.type,
+                "Type":message.message_type,
                 "FromUserName":user_from['UserName'],
                 "ToUserName":message.to_user_name,
                 "LocalID":local_id,
@@ -487,9 +488,9 @@ class WeChatAPI(object):
             },
             "Scene":0
         }
-        if message.type == 1:
+        if message.message_type == 1:
             params['Msg']["Content"]=message.content
-        elif message.type == 3:
+        elif message.message_type == 3:
             params['Msg']["MediaId"]=message.media_id
             params['Msg']["Content"]=""
         else:
@@ -511,7 +512,7 @@ class WeChatAPI(object):
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
-                "Type":message.type,
+                "Type":message.message_type,
                 "FromUserName":user_from['UserName'],
                 "ToUserName":message.to_user_name,
                 "LocalID":local_id,
@@ -519,9 +520,9 @@ class WeChatAPI(object):
             },
             "Scene":0
         }
-        if message.type == 1:
+        if message.message_type == 1:
             params['Msg']["Content"]=message.content
-        elif message.type == 3:
+        elif message.message_type == 3:
             params['Msg']["MediaId"]=message.media_id
             params['Msg']["Content"]=""
         else:
@@ -542,7 +543,7 @@ class WeChatAPI(object):
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
-                "Type":message.type,
+                "Type":message.message_type,
                 "FromUserName":user_from['UserName'],
                 "ToUserName":message.to_user_name,
                 "LocalID":local_id,
@@ -551,9 +552,9 @@ class WeChatAPI(object):
             },
             "Scene":0
         }
-        if message.type == 1:
+        if message.message_type == 1:
             params['Msg']["Content"]=message.content
-        elif message.type == 3:
+        elif message.message_type == 3:
             params['Msg']["MediaId"]=message.media_id
             params['Msg']["Content"]=""
         else:
@@ -576,7 +577,7 @@ class WeChatAPI(object):
         params = {
             'BaseRequest': self.__base_request,
             'Msg': {
-                "Type":message.type,
+                "Type":message.message_type,
                 "Content":message.content,
                 "FromUserName":user_from['UserName'],
                 "ToUserName":message.to_user_name,
