@@ -20,6 +20,7 @@ import logging
 import wechatutil
 
 class WeChatAPI(object):
+    __initialized__ = False 
     __HOSTS = {
         "weixin.qq.com":{
             'login':'login.weixin.qq.com',
@@ -59,8 +60,17 @@ class WeChatAPI(object):
         'Safari/537.36'
     ]
     
+    def __new__(self):
+        logging.debug("__new__")
+        if not hasattr(self, "instance"):
+            self.instance = super(WeChatAPI,self).__new__(self)
+        return self.instance
+    
     def __init__(self):
         #new
+        if WeChatAPI.__initialized__:
+            return
+        WeChatAPI.__initialized__ = True
         self.app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
         self.customFace = "%s\\customface"%(self.app_home)
         self.imageRecive = "%s\\imageRec"%(self.app_home)
@@ -668,7 +678,8 @@ class WeChatAPI(object):
               )
         data = self.__get(url,stream=True)
         if data:
-            image = ('%s/%s.%s'%(self.cache_image_home,msg_id,media_type))
+            image = ('%s\\%s.%s'%(self.imageRecive,msg_id,media_type))
+            logging.debug("download image as %s"%image)
             with open(image, 'wb') as image:
                 image.write(data)
         return data
@@ -714,7 +725,7 @@ class WeChatAPI(object):
             'Accept-Language': 'zh-TW,zh-HK;q=0.8,en-US;q=0.5,en;q=0.3',
             'User-Agent': self.__user_agent
         }
-
+        logging.debug("request url:%s"%url)
         while True:
             response = self.__session.get(url=url, data=data, headers=_headers)
             #self.cookies = data.coookies
@@ -746,6 +757,8 @@ class WeChatAPI(object):
         for (key,value) in headers.items():
             _headers[key]=value
 
+        logging.debug("post url:%s"%url)
+        logging.debug("headers:%s"%_headers)
         while True:
             try:
                 response = self.__session.post(url=url, data=data, headers=_headers,files=files)
@@ -823,11 +836,14 @@ class WeChatAPI(object):
 
 if __name__ =="__main__":
     api = WeChatAPI()
-    uuid = api.__get_uuid()
+    api2 = WeChatAPI()
+    print(id(api))
+    print(id(api2))
+    #uuid = api.__get_uuid()
     print("__get uuid success")
     api.generate_qrcode()
-    print("enerate_qrcode success")
-    res = api.wait4login()
+    print("generate_qrcode success")
+    code = api.wait4login()
     if not api.redirect_uri:
         res = api.wait4login(0)
         print("wait4login:")
