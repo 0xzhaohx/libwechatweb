@@ -71,9 +71,9 @@ class WeChatAPI(object):
         if WeChatAPI.__initialized__:
             return
         WeChatAPI.__initialized__ = True
-        self.app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
-        self.customFace = "%s\\customface"%(self.app_home)
-        self.imageRecive = "%s\\imageRec"%(self.app_home)
+        self.app_home = ("%s%s.wechat")%(os.path.expanduser('~'),os.sep)
+        self.customFace = "%s%scustomface"%(self.app_home,os.sep)
+        self.imageRecive = "%s%simageRec"%(self.app_home,os.sep)
         self.hosts = self.__HOSTS["weixin.qq.com"]
         logging.basicConfig(filename='./wechatwebapi.log',level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.__appid = 'wx782c26e4c19acffb'
@@ -286,7 +286,7 @@ class WeChatAPI(object):
         if not streamdata and ( len(streamdata) == 0 or b'' == streamdata or '' == streamdata ):
             logging.warning("stream data of %s is null"%head_img_url)
         else:
-            image = '%s\\%s.jpg'%(self.customFace,user_name)
+            image = '%s%s%s.jpg'%(self.customFace,os.sep,user_name)
             with open(image, 'wb') as image:
                 image.write(streamdata)
             
@@ -299,7 +299,7 @@ class WeChatAPI(object):
         if not streamdata:
             pass
         
-        image = '%s\\%s.jpg'%(self.customFace,user_name)
+        image = '%s%s%s.jpg'%(self.customFace,os.sep,user_name)
         #image = '%s/heads/contact/%s.jpg'%(self.app_home,user_name)
         with open(image, 'wb') as image:
             image.write(streamdata)
@@ -800,7 +800,7 @@ class WeChatAPI(object):
                 response.encoding='utf-8'
                 response_text = response.text
                 logging.info(url)
-                logging.info(response_text)
+                #logging.info(response_text)
                 response.close()
                 return response_text
             except (KeyboardInterrupt, SystemExit) as e:

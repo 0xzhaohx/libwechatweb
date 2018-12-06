@@ -59,12 +59,12 @@ class WeChatWeb(object):
         self.cache_image_home__ = "%s\\image"%(self.cache_home)
         '''
         #new
-        self.app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
-        self.customFace = "%s\\customface"%(self.app_home)
-        self.imageRecive = "%s\\imageRec"%(self.app_home)
+        self.app_home = ("%s%s.wechat")%(os.path.expanduser('~'),os.sep)
+        self.customFace = "%s%scustomface"%(self.app_home,os.sep)
+        self.imageRecive = "%s%simageRec"%(self.app_home,os.sep)
         self.default_head_icon = './resource/images/default.png'
         
-        logging.basicConfig(filename='%s\\wechat.log'%self.app_home,level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+        logging.basicConfig(filename='%s%swechat.log'%(self.app_home,os.sep),level=logging.DEBUG,format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
         self.status = -1#登陸成功與否
         self.__webchatwebapi = WeChatAPI()
         self.webchatwebapi = self.__webchatwebapi

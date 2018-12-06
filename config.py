@@ -10,10 +10,10 @@ import os
 class WechatConfig(object):
 
     def __init__(self):
-        self.__app_home = ("%s\\.wechat")%(os.path.expanduser('~'))
+        self.__app_home = ("%s%s.wechat")%(os.path.expanduser('~'),os.sep)
         #new
-        self.customFace = "%s\\customface"%(self.__app_home)
-        self.imageRecive = "%s\\imageRec"%(self.__app_home)
+        self.customFace = "%s%scustomface"%(self.__app_home,os.sep)
+        self.imageRecive = "%s%simageRec"%(self.__app_home,os.sep)
         self.__default_head_icon = './resource/images/default.png'
     
     def getAppHome(self):
